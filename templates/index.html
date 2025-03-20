@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат-бот ПУСК.FAQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #000000; /* Черный фон */
+            color: #ffffff; /* Белый текст */
+            margin: 0;
+            padding: 0;
+        }
+        #chat {
+            max-width: 600px;
+            margin: 50px auto;
+            background: hsl(0deg, 0%, 10.2%); /* Цвет окна чата */
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        h1 {
+            background-color: #212121; /* Цвет заголовка */
+            color: white;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            border-bottom: 2px solid #444;
+        }
+        #messages {
+            padding: 20px;
+            height: 400px;
+            overflow-y: scroll;
+            background-color: #1e1e1e; /* Цвет области сообщений */
+            border-bottom: 1px solid #444;
+        }
+
+.message {
+    display: inline-block; /* Изменяем на inline-block */
+    margin: 10px 0;
+    padding: 10px 15px;
+    border-radius: 20px;
+    max-width: 80%;
+    word-wrap: break-word;
+    vertical-align: top; /* Выравнивание по верхнему краю */
+}
+
+.user {
+    background-color: #ffffff; /* Цвет сообщений пользователя */
+    color: rgb(0, 0, 0);
+    margin-left: auto; /* Выравнивание вправо */
+    text-align: left;
+}
+
+.bot {
+    background-color: #444; /* Цвет сообщений бота */
+    color: white;
+    text-align: left;
+    margin-right: auto; /* Выравнивание влево */
+}
+        #user-input {
+    width: calc(100% - 100px);
+    min-width: 200px; /* Минимальная ширина поля ввода */
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 20px;
+    margin: 10px;
+    background-color: #333; /* Цвет поля ввода */
+    color: #ffffff; /* Цвет текста в поле ввода */
+    transition: border-color 0.3s;
+    text-align: left; /* Выравнивание текста по левому краю */
+}
+        #user-input:focus {
+            border-color: #ffffff;
+            outline: none;
+        }
+        #send-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background-color: #434343; /* Новый цвет кнопки */
+            color: white;
+            cursor: pointer;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        #send-button:hover {
+            background-color: #d3d3d3; /* Цвет кнопки при наведении */
+        }
+        #send-button:active {
+            background-color: #d3d3d3; /* Цвет кнопки при нажатии */
+        }
+    </style>
+</head>
+<body>
+    <div id="chat">
+        <h1>Чат-бот ПУСК.FAQ</h1>
+        <div id="messages"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+            <input type="text" id="user-input" placeholder="Введите ваш вопрос..." />
+            <button id="send-button">Отправить</button>
+        </div>
+    </div>
+
+    <script>
+        // Приветственное сообщение
+        const welcomeMessages = [
+            "Я - бот ПУСКа. Готов помочь с материалами контрольных проверок, работой в системе и отвечу на общие вопросы."
+        ];
+
+        const messagesDiv = document.getElementById('messages');
+        welcomeMessages.forEach(msg => {
+            messagesDiv.innerHTML += `<div class="message bot"><strong>Осмо:</strong> ${msg}</div>`;
+        });
+
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput) {
+                messagesDiv.innerHTML += `<div class="message user"><strong>Вы:</strong> ${userInput}</div>`;
+                document.getElementById('user-input').value = '';
+
+                fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question: userInput })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    messagesDiv.innerHTML += `<div class="message bot"><strong>Осмо:</strong> ${data.answer}</div>`;
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight; // Прокрутка вниз
+                });
+            }
+        }
+
+        document.getElementById('send-button').onclick = sendMessage;
+
+        // Обработчик нажатия клавиши Enter
+        document.getElementById('user-input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+                event.preventDefault(); // Предотвращаем переход на новую строку
+            }
+        });
+    </script>
+</body>
+</html>
